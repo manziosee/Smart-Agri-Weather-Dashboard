@@ -65,7 +65,6 @@ export function TreeAnalysisPanel() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Upload zone */}
         <div
           onDrop={onDrop}
           onDragOver={(e) => e.preventDefault()}
@@ -117,7 +116,6 @@ export function TreeAnalysisPanel() {
 
         {result && (
           <div className="space-y-4">
-            {/* Stats grid */}
             <div className="grid grid-cols-2 gap-3">
               <StatTile label="Total Trees" value={result.total_tree_count.toString()} />
               <StatTile label="Canopy Cover" value={`${result.canopy_coverage_pct}%`} />
@@ -127,7 +125,6 @@ export function TreeAnalysisPanel() {
               )}
             </div>
 
-            {/* Health bar */}
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Tree Health</span>
@@ -160,7 +157,6 @@ export function TreeAnalysisPanel() {
               </p>
             )}
 
-            {/* Overlay image */}
             {result.overlay_image_url && (
               <div className="relative h-44 w-full rounded-lg overflow-hidden border">
                 <Image src={result.overlay_image_url} alt="Tree detection overlay" fill className="object-cover" />
@@ -168,7 +164,6 @@ export function TreeAnalysisPanel() {
               </div>
             )}
 
-            {/* Observations */}
             {result.observations.length > 0 && (
               <div>
                 <p className="text-xs font-medium mb-1.5">Observations</p>
@@ -183,7 +178,6 @@ export function TreeAnalysisPanel() {
               </div>
             )}
 
-            {/* Recommendations */}
             {result.recommendations.length > 0 && (
               <div>
                 <p className="text-xs font-medium mb-1.5 text-primary">Recommendations</p>

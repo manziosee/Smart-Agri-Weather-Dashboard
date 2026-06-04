@@ -35,7 +35,6 @@ export function ForecastChart({ forecast, unit }: Props) {
         <CardTitle className="text-base">7-Day Forecast</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Icon strip */}
         <div className="flex justify-around mb-4">
           {forecast.slice(0, 7).map((d, i) => (
             <div key={i} className="flex flex-col items-center gap-1 text-xs text-muted-foreground">
@@ -47,7 +46,6 @@ export function ForecastChart({ forecast, unit }: Props) {
           ))}
         </div>
 
-        {/* Temperature chart */}
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
             <defs>

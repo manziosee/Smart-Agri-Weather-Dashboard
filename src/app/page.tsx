@@ -77,7 +77,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-card/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -117,12 +116,10 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Mobile search */}
         <div className="sm:hidden">
           <LocationSearch onLocation={setLocation} />
         </div>
 
-        {/* Status bar */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{location.name}</span>
           {lastUpdated && (
@@ -146,9 +143,7 @@ export default function Home() {
 
         {current && (
           <>
-            {/* Main 2-column layout */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left column */}
               <div className="lg:col-span-2 space-y-6">
                 <CurrentWeatherCard data={current} unit={unit} />
 
@@ -161,7 +156,6 @@ export default function Home() {
                 {hourly?.hourly && <HourlyChart hourly={hourly.hourly} />}
               </div>
 
-              {/* Right column */}
               <div className="space-y-6">
                 {usage && <UsageMeter data={usage} />}
                 <TreeAnalysisPanel />

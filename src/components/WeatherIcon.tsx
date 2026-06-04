@@ -16,7 +16,6 @@ interface Props {
 }
 
 export function WeatherIcon({ weatherId, className = "w-8 h-8" }: Props) {
-  // WMO / OpenWeather condition code ranges
   if (weatherId >= 200 && weatherId < 300) return <CloudLightning className={className} />;
   if (weatherId >= 300 && weatherId < 400) return <CloudDrizzle className={className} />;
   if (weatherId >= 500 && weatherId < 600) return <CloudRain className={className} />;

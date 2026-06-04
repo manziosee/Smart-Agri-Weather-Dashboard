@@ -41,7 +41,6 @@ export function HourlyChart({ hourly }: Props) {
         <CardTitle className="text-base">Hourly — Today</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Temperature line */}
         <div>
           <p className="text-xs text-muted-foreground mb-1.5">Temperature (°)</p>
           <ResponsiveContainer width="100%" height={120}>
@@ -55,7 +54,6 @@ export function HourlyChart({ hourly }: Props) {
           </ResponsiveContainer>
         </div>
 
-        {/* Precipitation bars */}
         <div>
           <p className="text-xs text-muted-foreground mb-1.5">Precipitation (mm)</p>
           <ResponsiveContainer width="100%" height={80}>
