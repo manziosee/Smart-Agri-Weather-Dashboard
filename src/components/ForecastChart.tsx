@@ -12,21 +12,19 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WeatherIcon } from "@/components/WeatherIcon";
 import { formatDate, formatTemp } from "@/lib/utils";
-import type { ForecastDay } from "@/lib/types";
+import type { DailyEntry } from "@/lib/types";
 
 interface Props {
-  forecast: ForecastDay[];
+  daily: DailyEntry[];
   unit: "metric" | "imperial";
 }
 
-export function ForecastChart({ forecast, unit }: Props) {
-  const chartData = forecast.map((d) => ({
+export function ForecastChart({ daily, unit }: Props) {
+  const chartData = daily.map((d) => ({
     date: formatDate(d.date),
     High: Math.round(d.temp_max),
     Low: Math.round(d.temp_min),
-    Rain: Math.round((d.precipitation ?? 0) * 100) / 100,
-    humidity: d.humidity,
-    weatherId: d.weather?.[0]?.id ?? 800,
+    Rain: Math.round(d.precipitation_sum * 10) / 10,
   }));
 
   return (
@@ -36,10 +34,10 @@ export function ForecastChart({ forecast, unit }: Props) {
       </CardHeader>
       <CardContent>
         <div className="flex justify-around mb-4">
-          {forecast.slice(0, 7).map((d, i) => (
+          {daily.slice(0, 7).map((d, i) => (
             <div key={i} className="flex flex-col items-center gap-1 text-xs text-muted-foreground">
               <span>{formatDate(d.date).split(",")[0]}</span>
-              <WeatherIcon weatherId={d.weather?.[0]?.id ?? 800} className="w-5 h-5 text-primary" />
+              <WeatherIcon code={d.condition_code} className="w-5 h-5 text-primary" />
               <span className="font-medium text-foreground">{formatTemp(d.temp_max, unit)}</span>
               <span className="opacity-60">{formatTemp(d.temp_min, unit)}</span>
             </div>
@@ -68,7 +66,7 @@ export function ForecastChart({ forecast, unit }: Props) {
                 borderRadius: "8px",
                 fontSize: "12px",
               }}
-              formatter={(val: number, name: string) => [`${val}°`, name]}
+              formatter={(val: number, name: string) => [name === "Rain" ? `${val} mm` : `${val}°`, name]}
             />
             <Legend wrapperStyle={{ fontSize: "12px" }} />
             <Area type="monotone" dataKey="High" stroke="hsl(var(--chart-3))" fill="url(#highGrad)" strokeWidth={2} />

@@ -12,18 +12,17 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTime } from "@/lib/utils";
-import type { HourlyPoint } from "@/lib/types";
+import type { HourlyEntry } from "@/lib/types";
 
 interface Props {
-  hourly: HourlyPoint[];
+  hourly: HourlyEntry[];
 }
 
 export function HourlyChart({ hourly }: Props) {
   const data = hourly.slice(0, 24).map((h) => ({
     time: formatTime(h.time),
-    Temp: Math.round(h.temp),
-    Rain: Math.round((h.precipitation ?? 0) * 10) / 10,
-    Humidity: h.humidity,
+    Temp: Math.round(h.temperature),
+    Rain: Math.round(h.precipitation_probability),
   }));
 
   const tooltipStyle = {
@@ -55,13 +54,13 @@ export function HourlyChart({ hourly }: Props) {
         </div>
 
         <div>
-          <p className="text-xs text-muted-foreground mb-1.5">Precipitation (mm)</p>
+          <p className="text-xs text-muted-foreground mb-1.5">Rain probability (%)</p>
           <ResponsiveContainer width="100%" height={80}>
             <BarChart data={data} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="time" tick={{ fontSize: 10 }} interval={3} stroke="hsl(var(--muted-foreground))" />
-              <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" unit="mm" />
-              <Tooltip {...tooltipStyle} formatter={(v: number) => [`${v} mm`, "Rain"]} />
+              <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" unit="%" />
+              <Tooltip {...tooltipStyle} formatter={(v: number) => [`${v}%`, "Rain chance"]} />
               <Bar dataKey="Rain" fill="hsl(var(--chart-2))" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

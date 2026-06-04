@@ -19,5 +19,8 @@ export async function GET(req: NextRequest) {
   );
 
   const data = await upstream.json();
-  return NextResponse.json(data, { status: upstream.status });
+  if (!upstream.ok) return NextResponse.json(data, { status: upstream.status });
+
+  const loc = data.location;
+  return NextResponse.json({ lat: loc.lat, lon: loc.lon, name: q });
 }

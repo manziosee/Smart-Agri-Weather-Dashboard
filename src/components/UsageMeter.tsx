@@ -10,8 +10,13 @@ interface Props {
 }
 
 export function UsageMeter({ data }: Props) {
-  const reqPct = Math.round((data.requests_used / data.requests_limit) * 100);
-  const aiPct = Math.round((data.ai_requests_used / data.ai_requests_limit) * 100);
+  const reqUsed = data.period.requestCount;
+  const reqLimit = data.limits.requests;
+  const aiUsed = data.period.aiRequestCount;
+  const aiLimit = data.limits.aiRequests;
+
+  const reqPct = Math.min(100, Math.round((reqUsed / reqLimit) * 100));
+  const aiPct = Math.min(100, Math.round((aiUsed / aiLimit) * 100));
 
   const planColor =
     data.plan === "scale" ? "default" : data.plan === "pro" ? "secondary" : "outline";
@@ -28,27 +33,27 @@ export function UsageMeter({ data }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <UsageStat
-          label="Requests"
-          used={data.requests_used}
-          limit={data.requests_limit}
-          pct={reqPct}
-        />
-        <UsageStat
-          label="AI Requests"
-          used={data.ai_requests_used}
-          limit={data.ai_requests_limit}
-          pct={aiPct}
-        />
+        <UsageStat label="Requests" used={reqUsed} limit={reqLimit} pct={reqPct} />
+        <UsageStat label="AI Requests" used={aiUsed} limit={aiLimit} pct={aiPct} />
         <p className="text-xs text-muted-foreground">
-          Resets {new Date(data.period_end).toLocaleDateString()}
+          Resets {new Date(data.period.end).toLocaleDateString()}
         </p>
       </CardContent>
     </Card>
   );
 }
 
-function UsageStat({ label, used, limit, pct }: { label: string; used: number; limit: number; pct: number }) {
+function UsageStat({
+  label,
+  used,
+  limit,
+  pct,
+}: {
+  label: string;
+  used: number;
+  limit: number;
+  pct: number;
+}) {
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-xs">
@@ -58,7 +63,10 @@ function UsageStat({ label, used, limit, pct }: { label: string; used: number; l
           <span className="text-muted-foreground ml-1">({pct}%)</span>
         </span>
       </div>
-      <Progress value={pct} className={pct > 80 ? "bg-destructive/20 [&>div]:bg-destructive" : ""} />
+      <Progress
+        value={pct}
+        className={pct > 80 ? "bg-destructive/20 [&>div]:bg-destructive" : ""}
+      />
     </div>
   );
 }

@@ -1,19 +1,20 @@
 "use client";
-import { Droplets, Wind, Eye, Gauge, Thermometer, MapPin } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Droplets, Wind, Thermometer, MapPin } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { WeatherIcon } from "@/components/WeatherIcon";
 import { formatTemp, getWindDirection } from "@/lib/utils";
-import type { CurrentWeather } from "@/lib/types";
+import { wmoLabel } from "@/lib/wmo";
+import type { WeatherResponse } from "@/lib/types";
 
 interface Props {
-  data: CurrentWeather;
+  data: WeatherResponse;
+  locationName: string;
   unit: "metric" | "imperial";
 }
 
-export function CurrentWeatherCard({ data, unit }: Props) {
-  const { location, current } = data;
-  const condition = current.weather?.[0];
+export function CurrentWeatherCard({ data, locationName, unit }: Props) {
+  const { location, current, hourly } = data;
+  const now = hourly[0];
 
   return (
     <Card className="overflow-hidden">
@@ -22,30 +23,29 @@ export function CurrentWeatherCard({ data, unit }: Props) {
           <div>
             <div className="flex items-center gap-1.5 text-sm opacity-90 mb-1">
               <MapPin className="w-3.5 h-3.5" />
-              <span>{location.name}, {location.country}</span>
+              <span>{locationName}, {location.country}</span>
             </div>
-            <div className="text-6xl font-bold">{formatTemp(current.temp, unit)}</div>
-            <div className="text-lg opacity-90 mt-1 capitalize">
-              {condition?.description ?? "—"}
-            </div>
-            <div className="text-sm opacity-75 mt-0.5">
-              Feels like {formatTemp(current.feels_like, unit)}
-            </div>
+            <div className="text-6xl font-bold">{formatTemp(current.temperature, unit)}</div>
+            <div className="text-lg opacity-90 mt-1">{wmoLabel(current.condition_code)}</div>
+            {now && (
+              <div className="text-sm opacity-75 mt-0.5">
+                Feels like {formatTemp(now.feels_like, unit)}
+              </div>
+            )}
           </div>
-          <WeatherIcon
-            weatherId={condition?.id ?? 800}
-            className="w-20 h-20 opacity-90"
-          />
+          <WeatherIcon code={current.condition_code} className="w-20 h-20 opacity-90" />
         </div>
       </div>
 
       <CardContent className="pt-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <Stat icon={<Droplets className="w-4 h-4 text-blue-500" />} label="Humidity" value={`${current.humidity}%`} />
-          <Stat icon={<Wind className="w-4 h-4 text-slate-500" />} label="Wind" value={`${Math.round(current.wind_speed)} m/s ${getWindDirection(current.wind_deg)}`} />
-          <Stat icon={<Gauge className="w-4 h-4 text-purple-500" />} label="Pressure" value={`${current.pressure} hPa`} />
-          <Stat icon={<Eye className="w-4 h-4 text-cyan-500" />} label="Visibility" value={`${(current.visibility / 1000).toFixed(1)} km`} />
-          <Stat icon={<Thermometer className="w-4 h-4 text-orange-500" />} label="UV Index" value={uvLabel(current.uv_index)} />
+          {now && (
+            <Stat icon={<Droplets className="w-4 h-4 text-blue-500" />} label="Humidity" value={`${now.humidity}%`} />
+          )}
+          <Stat icon={<Wind className="w-4 h-4 text-slate-500" />} label="Wind" value={`${Math.round(current.wind_speed)} m/s ${getWindDirection(current.wind_direction)}`} />
+          {now && (
+            <Stat icon={<Thermometer className="w-4 h-4 text-orange-500" />} label="UV Index" value={uvLabel(now.uv_index)} />
+          )}
         </div>
       </CardContent>
     </Card>

@@ -2,14 +2,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { Leaf, RefreshCw, Loader2, AlertCircle, Moon, Sun as SunIcon } from "lucide-react";
 import { CurrentWeatherCard } from "@/components/CurrentWeatherCard";
-import { AISummaryCard } from "@/components/AISummaryCard";
 import { ForecastChart } from "@/components/ForecastChart";
 import { HourlyChart } from "@/components/HourlyChart";
 import { UsageMeter } from "@/components/UsageMeter";
 import { TreeAnalysisPanel } from "@/components/TreeAnalysisPanel";
 import { LocationSearch } from "@/components/LocationSearch";
 import { Button } from "@/components/ui/button";
-import type { CurrentWeather, WeatherForecast, HourlyForecast, UsageData } from "@/lib/types";
+import type { WeatherResponse, UsageData } from "@/lib/types";
 
 interface Coords {
   lat: number;
@@ -24,9 +23,7 @@ export default function Home() {
   const [unit, setUnit] = useState<"metric" | "imperial">("metric");
   const [dark, setDark] = useState(false);
 
-  const [current, setCurrent] = useState<CurrentWeather | null>(null);
-  const [forecast, setForecast] = useState<WeatherForecast | null>(null);
-  const [hourly, setHourly] = useState<HourlyForecast | null>(null);
+  const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [usage, setUsage] = useState<UsageData | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -37,28 +34,18 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      const params = `lat=${coords.lat}&lon=${coords.lon}&units=${unit}`;
-
-      const [currentRes, forecastRes, hourlyRes, usageRes] = await Promise.all([
-        fetch(`/api/current?${params}`),
-        fetch(`/api/weather?${params}&days=7`),
-        fetch(`/api/hourly?${params}`),
+      const params = `lat=${coords.lat}&lon=${coords.lon}&units=${unit}&days=7`;
+      const [weatherRes, usageRes] = await Promise.all([
+        fetch(`/api/weather?${params}`),
         fetch(`/api/usage`),
       ]);
 
-      const [cur, fore, hour, use] = await Promise.all([
-        currentRes.json(),
-        forecastRes.json(),
-        hourlyRes.json(),
-        usageRes.json(),
-      ]);
+      const [w, u] = await Promise.all([weatherRes.json(), usageRes.json()]);
 
-      if (!currentRes.ok) throw new Error(cur.error ?? cur.message ?? "Failed to load weather");
+      if (!weatherRes.ok) throw new Error(w.error ?? w.message ?? "Failed to load weather");
 
-      setCurrent(cur);
-      if (forecastRes.ok) setForecast(fore);
-      if (hourlyRes.ok) setHourly(hour);
-      if (usageRes.ok) setUsage(use);
+      setWeather(w);
+      if (usageRes.ok) setUsage(u);
       setLastUpdated(new Date());
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load weather data");
@@ -134,40 +121,34 @@ export default function Home() {
           </div>
         )}
 
-        {loading && !current && (
+        {loading && !weather && (
           <div className="flex flex-col items-center justify-center py-24 text-muted-foreground gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
             <p className="text-sm">Loading weather data…</p>
           </div>
         )}
 
-        {current && (
-          <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <CurrentWeatherCard data={current} unit={unit} />
-
-                {current.ai_summary && <AISummaryCard summary={current.ai_summary} />}
-
-                {forecast?.forecast && (
-                  <ForecastChart forecast={forecast.forecast} unit={unit} />
-                )}
-
-                {hourly?.hourly && <HourlyChart hourly={hourly.hourly} />}
-              </div>
-
-              <div className="space-y-6">
-                {usage && <UsageMeter data={usage} />}
-                <TreeAnalysisPanel />
-              </div>
+        {weather && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <CurrentWeatherCard data={weather} locationName={location.name} unit={unit} />
+              {weather.daily?.length > 0 && (
+                <ForecastChart daily={weather.daily} unit={unit} />
+              )}
+              {weather.hourly?.length > 0 && <HourlyChart hourly={weather.hourly} />}
             </div>
-          </>
+
+            <div className="space-y-6">
+              {usage && <UsageMeter data={usage} />}
+              <TreeAnalysisPanel />
+            </div>
+          </div>
         )}
       </main>
 
       <footer className="border-t mt-12 py-4 text-center text-xs text-muted-foreground">
         Powered by{" "}
-        <a href="https://weather-ai.co" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+        <a href="https://weather-ai.co" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
           WeatherAI
         </a>{" "}
         · FarmPulse © {new Date().getFullYear()}

@@ -1,67 +1,71 @@
-export interface CurrentWeather {
-  location: {
-    name: string;
-    country: string;
-    lat: number;
-    lon: number;
-    timezone: string;
-  };
-  current: {
-    temp: number;
-    feels_like: number;
-    humidity: number;
-    pressure: number;
-    visibility: number;
-    uv_index: number;
-    wind_speed: number;
-    wind_deg: number;
-    weather: { id: number; main: string; description: string; icon: string }[];
-    dt: number;
-  };
-  ai_summary?: string;
+export interface ApiLocation {
+  lat: number;
+  lon: number;
+  timezone: string;
+  country: string;
 }
 
-export interface ForecastDay {
-  date: string;
-  temp_min: number;
-  temp_max: number;
-  humidity: number;
-  precipitation: number;
-  weather: { id: number; main: string; description: string; icon: string }[];
+export interface CurrentCondition {
+  time: string;
+  temperature: number;
   wind_speed: number;
+  wind_direction: number;
+  condition_code: string;
+  icon: string;
+}
+
+export interface HourlyEntry {
+  time: string;
+  temperature: number;
+  precipitation_probability: number;
+  wind_speed: number;
+  condition_code: string;
+  icon: string;
+  humidity: number;
+  feels_like: number;
+  wind_gust: number;
   uv_index: number;
 }
 
-export interface WeatherForecast {
-  location: CurrentWeather["location"];
-  forecast: ForecastDay[];
-  ai_summary?: string;
+export interface DailyEntry {
+  date: string;
+  temp_min: number;
+  temp_max: number;
+  precipitation_sum: number;
+  precipitation_probability: number;
+  sunrise: string;
+  sunset: string;
+  condition_code: string;
+  icon: string;
+  wind_max: number;
 }
 
-export interface HourlyPoint {
-  dt: number;
-  time: string;
-  temp: number;
-  feels_like: number;
-  humidity: number;
-  precipitation: number;
-  wind_speed: number;
-  weather: { id: number; main: string; description: string; icon: string }[];
-}
-
-export interface HourlyForecast {
-  location: CurrentWeather["location"];
-  hourly: HourlyPoint[];
+export interface WeatherResponse {
+  location: ApiLocation;
+  current: CurrentCondition;
+  hourly: HourlyEntry[];
+  daily: DailyEntry[];
 }
 
 export interface UsageData {
   plan: string;
-  requests_used: number;
-  requests_limit: number;
-  ai_requests_used: number;
-  ai_requests_limit: number;
-  period_start: string;
-  period_end: string;
+  period: {
+    start: string;
+    end: string;
+    requestCount: number;
+    aiRequestCount: number;
+  };
+  limits: {
+    requests: number;
+    aiRequests: number;
+    maxDays: number;
+    webhooks: boolean;
+    sms: boolean;
+  };
+  remaining: {
+    requests: number;
+    aiRequests: number;
+  };
 }
 
 export interface TreeAnalysis {
