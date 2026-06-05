@@ -5,6 +5,8 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss)](https://tailwindcss.com)
+[![Fly.io](https://img.shields.io/badge/Deployed-Fly.io-8B5CF6?logo=flydotio&logoColor=white)](https://farmpulse.fly.dev)
+[![CI/CD](https://github.com/manziosee/Smart-Agri-Weather-Dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/manziosee/Smart-Agri-Weather-Dashboard/actions/workflows/deploy.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 **Live demo:** [farmpulse.fly.dev](https://farmpulse.fly.dev)  
@@ -62,15 +64,16 @@
 
 | Layer | Technology |
 |---|---|
-| Framework | [Next.js 16](https://nextjs.org) — App Router, TypeScript |
-| Styling | [Tailwind CSS 3](https://tailwindcss.com) — utility-first, light/dark mode |
-| Charts | [Recharts 2](https://recharts.org) — area, bar, line, composed |
-| UI Primitives | [Radix UI](https://radix-ui.com) — accessible components |
-| Icons | [Lucide React](https://lucide.dev) |
-| Image export | [html-to-image](https://github.com/bubkoo/html-to-image) |
-| Geocoding | [OpenStreetMap Nominatim](https://nominatim.org) — free, no key |
-| Weather API | [WeatherAI](https://weather-ai.co) — forecasts + AI analysis |
-| Deployment | [Vercel](https://vercel.com) |
+| ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white) | [Next.js 16](https://nextjs.org) — App Router, TypeScript |
+| ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) | [TypeScript 5](https://www.typescriptlang.org) — static type safety |
+| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38bdf8?logo=tailwindcss&logoColor=white) | [Tailwind CSS 3](https://tailwindcss.com) — utility-first, light/dark mode |
+| ![Recharts](https://img.shields.io/badge/Recharts-2-22b5bf?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0zIDNoMTh2MThIM3oiLz48L3N2Zz4=&logoColor=white) | [Recharts 2](https://recharts.org) — area, bar, line, composed charts |
+| ![Radix UI](https://img.shields.io/badge/Radix_UI-latest-161618?logo=radix-ui&logoColor=white) | [Radix UI](https://radix-ui.com) — accessible components |
+| ![Lucide](https://img.shields.io/badge/Lucide_React-icons-f56565?logo=lucide&logoColor=white) | [Lucide React](https://lucide.dev) — icon library |
+| ![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-Nominatim-7EBC6F?logo=openstreetmap&logoColor=white) | [Nominatim](https://nominatim.org) — free geocoding, no key needed |
+| ![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?logo=docker&logoColor=white) | [Docker](https://docker.com) — multi-stage build, standalone output |
+| ![Fly.io](https://img.shields.io/badge/Fly.io-deployed-8B5CF6?logo=flydotio&logoColor=white) | [Fly.io](https://fly.io) — global edge deployment |
+| ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?logo=github-actions&logoColor=white) | [GitHub Actions](https://github.com/features/actions) — automated build & deploy |
 
 ---
 
@@ -129,22 +132,10 @@ npm start
 
 ---
 
-## Deployment (Vercel) — recommended
-
-1. Push this repo to GitHub
-2. Go to [vercel.com/new](https://vercel.com/new) and import the repository
-3. Add environment variables in the Vercel dashboard:
-
-| Key | Value |
-|---|---|
-| `WEATHER_AI_API_KEY` | your key from weather-ai.co |
-| `WEATHER_AI_BASE_URL` | `https://api.weather-ai.co` |
-
-4. Click **Deploy** — Vercel auto-detects Next.js and builds correctly
-
----
-
 ## Deployment (Fly.io)
+
+[![Fly.io](https://img.shields.io/badge/Deployed_on-Fly.io-8B5CF6?logo=flydotio&logoColor=white)](https://farmpulse.fly.dev)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](https://github.com/manziosee/Smart-Agri-Weather-Dashboard/actions)
 
 Fly.io runs the app as a Docker container globally. All config is in `fly.toml` and `Dockerfile`.
 
@@ -238,6 +229,45 @@ flyctl ssh console     # SSH into the running container
 | `force_https` | `true` | Auto TLS via Fly.io |
 
 > **Regions:** Run `flyctl platform regions` to list all available regions and pick the closest to your users.
+
+---
+
+## CI/CD — GitHub Actions
+
+Every push to `main` automatically builds and deploys to Fly.io via GitHub Actions.
+
+### How it works
+
+| Event | What happens |
+|---|---|
+| Push to `main` | Build + type-check → deploy to Fly.io |
+| Pull request to `main` | Build + type-check only (no deploy) |
+
+This means:
+- Broken builds **block deployment** — bad code never reaches production
+- PRs are validated before merge
+- No manual `flyctl deploy` needed after the initial setup
+
+### Setup (one-time)
+
+**1. Get your Fly.io API token:**
+```bash
+flyctl tokens create deploy -x 999999h
+```
+
+**2. Add it to GitHub:**
+- Go to your repo → **Settings** → **Secrets and variables** → **Actions**
+- Click **New repository secret**
+- Name: `FLY_API_TOKEN`
+- Value: paste the token from step 1
+- Click **Add secret**
+
+**3. Push to main — it deploys automatically:**
+```bash
+git push origin main
+```
+
+Monitor deployments at: `https://github.com/manziosee/Smart-Agri-Weather-Dashboard/actions`
 
 ---
 

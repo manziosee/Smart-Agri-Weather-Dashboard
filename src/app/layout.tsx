@@ -9,6 +9,13 @@ export const metadata: Metadata = {
   description: "Real-time weather intelligence and AI-powered farm analytics for modern agriculture",
   keywords: ["agriculture", "weather", "farming", "AI", "dashboard"],
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: { url: "/icon-192.png", sizes: "192x192" },
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
