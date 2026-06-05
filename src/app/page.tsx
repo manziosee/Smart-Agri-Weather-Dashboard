@@ -78,8 +78,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── Header ── */}
-      <header className="sticky top-0 z-20 border-b bg-card/90 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center gap-2 sm:gap-4">
+      <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-3 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto bg-card border border-border rounded-xl px-4 sm:px-6 h-16 flex items-center gap-2 sm:gap-4 shadow-sm">
           {/* Logo */}
           <div className="flex items-center gap-2 shrink-0">
             <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
