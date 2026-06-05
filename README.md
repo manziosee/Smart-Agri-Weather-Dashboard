@@ -7,7 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss)](https://tailwindcss.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-**Live demo:** _deploy to Vercel and add your link here_  
+**Live demo:** [farmpulse.fly.dev](https://farmpulse.fly.dev)  
 **Repository:** [github.com/manziosee/Smart-Agri-Weather-Dashboard](https://github.com/manziosee/Smart-Agri-Weather-Dashboard)
 
 ---
