@@ -30,6 +30,9 @@ next-env.d.ts
 # Vercel
 .vercel
 
+# Fly.io
+.fly/
+
 # Misc
 .DS_Store
 *.pem

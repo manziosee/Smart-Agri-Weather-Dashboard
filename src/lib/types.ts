@@ -45,6 +45,24 @@ export interface WeatherResponse {
   current: CurrentCondition;
   hourly: HourlyEntry[];
   daily: DailyEntry[];
+  ai_summary?: string;
+}
+
+export interface WeatherAlert {
+  id: string;
+  label: string;
+  field: "precipitation_sum" | "temp_max" | "temp_min" | "wind_max" | "precipitation_probability";
+  operator: "gt" | "lt";
+  threshold: number;
+  unit: string;
+}
+
+export interface IrrigationAdvice {
+  cropName: string;
+  emoji: string;
+  needsMm: number;
+  recommendation: "irrigate" | "skip" | "monitor";
+  reason: string;
 }
 
 export interface UsageData {

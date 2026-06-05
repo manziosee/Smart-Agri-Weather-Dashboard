@@ -1,5 +1,6 @@
 import {
   Sun,
+  Moon,
   Cloud,
   CloudRain,
   CloudSnow,
@@ -7,17 +8,19 @@ import {
   CloudDrizzle,
   Wind,
   Cloudy,
+  CloudMoon,
 } from "lucide-react";
 
 interface Props {
   code: string;
   className?: string;
+  isNight?: boolean;
 }
 
-export function WeatherIcon({ code, className = "w-8 h-8" }: Props) {
+export function WeatherIcon({ code, className = "w-8 h-8", isNight = false }: Props) {
   const n = parseInt(code, 10);
-  if (n === 0) return <Sun className={className} />;
-  if (n <= 2) return <Cloudy className={className} />;
+  if (n === 0) return isNight ? <Moon className={className} /> : <Sun className={className} />;
+  if (n <= 2) return isNight ? <CloudMoon className={className} /> : <Cloudy className={className} />;
   if (n === 3) return <Cloud className={className} />;
   if (n <= 48) return <Wind className={className} />;
   if (n <= 57) return <CloudDrizzle className={className} />;

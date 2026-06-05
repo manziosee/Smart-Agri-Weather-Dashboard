@@ -1,0 +1,38 @@
+# fly.toml — FarmPulse Fly.io deployment config
+# Update `app` to your actual app name after running: flyctl launch
+app = "farmpulse"
+primary_region = "jnb"   # Johannesburg — closest to East Africa
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  NEXT_TELEMETRY_DISABLED = "1"
+  PORT = "3000"
+
+# Secrets (never put real values here — set with `flyctl secrets set`):
+#   flyctl secrets set WEATHER_AI_API_KEY=wai_your_key_here
+#   flyctl secrets set WEATHER_AI_BASE_URL=https://api.weather-ai.co
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+[deploy]
+  strategy = "rolling"
