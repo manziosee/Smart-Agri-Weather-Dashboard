@@ -11,9 +11,9 @@ interface Props {
 }
 
 const SCORE_CONFIG: Record<FarmScore, { label: string; icon: React.ReactNode; badge: "success" | "warning" | "destructive" }> = {
-  good: { label: "Good day", icon: <CheckCircle2 className="w-4 h-4" />, badge: "success" },
-  caution: { label: "Use caution", icon: <AlertTriangle className="w-4 h-4" />, badge: "warning" },
-  poor: { label: "Poor day", icon: <XCircle className="w-4 h-4" />, badge: "destructive" },
+  good: { label: "Good", icon: <CheckCircle2 className="w-3.5 h-3.5" />, badge: "success" },
+  caution: { label: "Caution", icon: <AlertTriangle className="w-3.5 h-3.5" />, badge: "warning" },
+  poor: { label: "Poor", icon: <XCircle className="w-3.5 h-3.5" />, badge: "destructive" },
 };
 
 export function FarmSummaryCard({ daily }: Props) {
@@ -49,15 +49,15 @@ export function FarmSummaryCard({ daily }: Props) {
           {scores.map((s, i) => {
             const cfg = SCORE_CONFIG[s.score];
             return (
-              <div key={i} className="flex items-start gap-2">
-                <Badge variant={cfg.badge} className="flex items-center gap-1 shrink-0 mt-0.5">
+              <div key={i} className="flex flex-wrap items-start gap-x-2 gap-y-0.5">
+                <Badge variant={cfg.badge} className="flex items-center gap-1 shrink-0">
                   {cfg.icon}
                   {cfg.label}
                 </Badge>
-                <div className="min-w-0">
-                  <span className="text-xs font-medium">{formatDate(s.date)}</span>
-                  <span className="text-xs text-muted-foreground ml-2">{s.reasons.join(" · ")}</span>
-                </div>
+                <span className="text-xs font-medium text-foreground">{formatDate(s.date)}</span>
+                <span className="text-xs text-muted-foreground w-full sm:w-auto">
+                  {s.reasons.join(" · ")}
+                </span>
               </div>
             );
           })}
