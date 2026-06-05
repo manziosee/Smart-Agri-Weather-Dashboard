@@ -16,7 +16,21 @@
 
 ## Screenshots
 
-> Add screenshots here after deploying — e.g. `![Dashboard](./docs/screenshot-desktop.png)`
+### Desktop
+
+![Desktop 1](./img/Desktop1.png)
+
+![Desktop 2](./img/Desktop2.png)
+
+### Mobile
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="./img/Mobile1.jpeg" width="220" alt="Mobile 1" /></td>
+    <td align="center"><img src="./img/Mobile2.jpeg" width="220" alt="Mobile 2" /></td>
+    <td align="center"><img src="./img/Mobile3.jpeg" width="220" alt="Mobile 3" /></td>
+  </tr>
+</table>
 
 ---
 
