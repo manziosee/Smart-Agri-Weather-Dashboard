@@ -13,14 +13,36 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "lat and lon are required" }, { status: 400 });
   }
 
-  const upstream = await fetch(
-    `${BASE}/v1/weather?lat=${lat}&lon=${lon}&days=${days}&units=${units}&ai=true`,
-    {
-      headers: { Authorization: `Bearer ${process.env.WEATHER_AI_API_KEY}` },
-      next: { revalidate: 300 },
-    }
-  );
+  try {
+    const upstream = await fetch(
+      `${BASE}/v1/weather?lat=${lat}&lon=${lon}&days=${days}&units=${units}&ai=true`,
+      {
+        headers: { Authorization: `Bearer ${process.env.WEATHER_AI_API_KEY}` },
+        next: { revalidate: 300 },
+      }
+    );
 
-  const data = await upstream.json();
-  return NextResponse.json(data, { status: upstream.status });
+    const data = await upstream.json();
+
+    // WeatherAI returns 500 for unsupported regions — surface a clear message
+    if (!upstream.ok) {
+      const message = data?.message ?? data?.error ?? null;
+      const isUnsupported = upstream.status === 500 || message?.toLowerCase().includes("not supported");
+      return NextResponse.json(
+        {
+          error: isUnsupported
+            ? "Weather data is not available for this location. Please try a different city."
+            : (message ?? "Failed to load weather data"),
+        },
+        { status: upstream.status }
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to reach the weather service. Please try again." },
+      { status: 503 }
+    );
+  }
 }
