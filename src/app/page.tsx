@@ -7,7 +7,14 @@ import { HourlyChart } from "@/components/HourlyChart";
 import { UsageMeter } from "@/components/UsageMeter";
 import { TreeAnalysisPanel } from "@/components/TreeAnalysisPanel";
 import { LocationSearch } from "@/components/LocationSearch";
+import { SunriseSunsetCard } from "@/components/SunriseSunsetCard";
+import { FarmSummaryCard } from "@/components/FarmSummaryCard";
+import { WindCompass } from "@/components/WindCompass";
+import { CropAdvisoryPanel } from "@/components/CropAdvisoryPanel";
+import { BookmarkedLocations } from "@/components/BookmarkedLocations";
+import { ShareButton } from "@/components/ShareButton";
 import { Button } from "@/components/ui/button";
+import { useAutoLocation } from "@/hooks/useAutoLocation";
 import type { WeatherResponse, UsageData } from "@/lib/types";
 
 interface Coords {
@@ -39,11 +46,8 @@ export default function Home() {
         fetch(`/api/weather?${params}`),
         fetch(`/api/usage`),
       ]);
-
       const [w, u] = await Promise.all([weatherRes.json(), usageRes.json()]);
-
       if (!weatherRes.ok) throw new Error(w.error ?? w.message ?? "Failed to load weather");
-
       setWeather(w);
       if (usageRes.ok) setUsage(u);
       setLastUpdated(new Date());
@@ -54,13 +58,14 @@ export default function Home() {
     }
   }, [unit]);
 
-  useEffect(() => {
-    fetchWeather(location);
-  }, [location, unit, fetchWeather]);
+  useEffect(() => { fetchWeather(location); }, [location, unit, fetchWeather]);
+  useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
+  function handleLocation(coords: Coords) {
+    setLocation(coords);
+  }
+
+  useAutoLocation(handleLocation);
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,10 +79,13 @@ export default function Home() {
           </div>
 
           <div className="flex-1 max-w-md hidden sm:block">
-            <LocationSearch onLocation={setLocation} />
+            <LocationSearch onLocation={handleLocation} />
           </div>
 
           <div className="flex items-center gap-1.5">
+            {weather && (
+              <ShareButton targetId="weather-snapshot" filename="farmpulse-weather.png" />
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -104,7 +112,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <div className="sm:hidden">
-          <LocationSearch onLocation={setLocation} />
+          <LocationSearch onLocation={handleLocation} />
         </div>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -130,16 +138,34 @@ export default function Home() {
 
         {weather && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+            <div id="weather-snapshot" className="lg:col-span-2 space-y-6">
               <CurrentWeatherCard data={weather} locationName={location.name} unit={unit} />
+
+              {weather.daily?.[0] && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <SunriseSunsetCard today={weather.daily[0]} />
+                  <WindCompass
+                    direction={weather.current.wind_direction}
+                    speed={weather.current.wind_speed}
+                  />
+                </div>
+              )}
+
+              {weather.daily?.length > 0 && (
+                <FarmSummaryCard daily={weather.daily} />
+              )}
+
               {weather.daily?.length > 0 && (
                 <ForecastChart daily={weather.daily} unit={unit} />
               )}
+
               {weather.hourly?.length > 0 && <HourlyChart hourly={weather.hourly} />}
             </div>
 
             <div className="space-y-6">
               {usage && <UsageMeter data={usage} />}
+              <BookmarkedLocations current={location} onSelect={handleLocation} />
+              <CropAdvisoryPanel weather={weather} />
               <TreeAnalysisPanel />
             </div>
           </div>
