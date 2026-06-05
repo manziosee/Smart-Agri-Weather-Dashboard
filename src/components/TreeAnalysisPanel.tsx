@@ -1,6 +1,6 @@
 "use client";
-import { useState, useRef } from "react";
-import { Upload, TreePine, Loader2, CheckCircle2, AlertCircle, ImageIcon } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { TreePine, Loader2, CheckCircle2, AlertCircle, ImageIcon, History, ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,36 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { TreeAnalysis } from "@/lib/types";
 
+const HISTORY_KEY = "fp_tree_history";
+const MAX_HISTORY = 5;
+
+interface HistoryEntry {
+  id: string;
+  date: string;
+  label: string;
+  result: TreeAnalysis;
+}
+
+function loadHistory(): HistoryEntry[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]"); } catch { return []; }
+}
+
+function saveHistory(entries: HistoryEntry[]) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, MAX_HISTORY)));
+}
+
 export function TreeAnalysisPanel() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [result, setResult] = useState<TreeAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setHistory(loadHistory()); }, []);
 
   function handleFile(f: File) {
     if (!f.type.match(/image\/(jpeg|png|webp)/)) {
@@ -44,9 +67,18 @@ export function TreeAnalysisPanel() {
 
       const res = await fetch("/api/trees/analyze", { method: "POST", body: fd });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error ?? "Analysis failed");
+
       setResult(data);
+      const entry: HistoryEntry = {
+        id: data.analysis_id,
+        date: new Date().toLocaleDateString(),
+        label: file.name.replace(/\.[^.]+$/, ""),
+        result: data,
+      };
+      const next = [entry, ...loadHistory()].slice(0, MAX_HISTORY);
+      setHistory(next);
+      saveHistory(next);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -54,17 +86,46 @@ export function TreeAnalysisPanel() {
     }
   }
 
-  const healthy = result ? Math.round((result.tree_health.healthy / result.total_tree_count) * 100) : 0;
-
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <TreePine className="w-4 h-4 text-primary" />
-          Farm Tree Analysis
+        <CardTitle className="flex items-center justify-between text-base">
+          <span className="flex items-center gap-2">
+            <TreePine className="w-4 h-4 text-primary" />
+            Farm Tree Analysis
+          </span>
+          {history.length > 0 && (
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowHistory(!showHistory)}>
+              <History className="w-3.5 h-3.5" />
+              History ({history.length})
+              {showHistory ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {showHistory && history.length > 0 && (
+          <div className="border rounded-lg divide-y">
+            {history.map((h) => (
+              <button
+                type="button"
+                key={h.id}
+                className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-accent/50 transition-colors"
+                onClick={() => { setResult(h.result); setShowHistory(false); }}
+              >
+                <div>
+                  <p className="text-xs font-medium truncate max-w-[160px]">{h.label}</p>
+                  <p className="text-xs text-muted-foreground">{h.date}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-bold">{h.result.total_tree_count} trees</p>
+                  <p className="text-xs text-muted-foreground">{h.result.canopy_coverage_pct}% canopy</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div
           onDrop={onDrop}
           onDragOver={(e) => e.preventDefault()}
@@ -74,6 +135,7 @@ export function TreeAnalysisPanel() {
           <input
             ref={inputRef}
             type="file"
+            aria-label="Upload farm image for tree analysis"
             accept="image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
@@ -85,9 +147,7 @@ export function TreeAnalysisPanel() {
           ) : (
             <div className="space-y-2">
               <ImageIcon className="w-10 h-10 mx-auto text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Drop a farm image here or click to browse
-              </p>
+              <p className="text-sm text-muted-foreground">Drop a farm image here or click to browse</p>
               <p className="text-xs text-muted-foreground">JPEG · PNG · WEBP · max 20 MB</p>
             </div>
           )}
@@ -125,30 +185,26 @@ export function TreeAnalysisPanel() {
               )}
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Tree Health</span>
-                <span className="font-medium">{healthy}% healthy</span>
-              </div>
-              <div className="flex h-2.5 rounded-full overflow-hidden gap-0.5">
-                <div
-                  className="bg-green-500 transition-all"
-                  style={{ width: `${(result.tree_health.healthy / result.total_tree_count) * 100}%` }}
-                />
-                <div
-                  className="bg-yellow-400 transition-all"
-                  style={{ width: `${(result.tree_health.needs_care / result.total_tree_count) * 100}%` }}
-                />
-                <div
-                  className="bg-red-500 transition-all"
-                  style={{ width: `${(result.tree_health.needs_replacement / result.total_tree_count) * 100}%` }}
-                />
-              </div>
-              <div className="flex gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" />Healthy ({result.tree_health.healthy})</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />Care ({result.tree_health.needs_care})</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" />Replace ({result.tree_health.needs_replacement})</span>
-              </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground font-medium">Tree Health</p>
+              <HealthBar
+                label="Healthy"
+                count={result.tree_health.healthy}
+                total={result.total_tree_count}
+                colorClass="[&>div]:bg-green-500"
+              />
+              <HealthBar
+                label="Needs care"
+                count={result.tree_health.needs_care}
+                total={result.total_tree_count}
+                colorClass="[&>div]:bg-yellow-400"
+              />
+              <HealthBar
+                label="Replace"
+                count={result.tree_health.needs_replacement}
+                total={result.total_tree_count}
+                colorClass="[&>div]:bg-red-500"
+              />
             </div>
 
             {result.tree_species_guess && (
@@ -170,8 +226,7 @@ export function TreeAnalysisPanel() {
                 <ul className="space-y-1">
                   {result.observations.map((obs, i) => (
                     <li key={i} className="text-xs text-muted-foreground flex gap-2">
-                      <span className="text-primary mt-0.5">•</span>
-                      {obs}
+                      <span className="text-primary mt-0.5">•</span>{obs}
                     </li>
                   ))}
                 </ul>
@@ -184,8 +239,7 @@ export function TreeAnalysisPanel() {
                 <ul className="space-y-1">
                   {result.recommendations.map((rec, i) => (
                     <li key={i} className="text-xs text-foreground/80 flex gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
-                      {rec}
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />{rec}
                     </li>
                   ))}
                 </ul>
@@ -203,6 +257,29 @@ function StatTile({ label, value }: { label: string; value: string }) {
     <div className="bg-muted/50 rounded-lg p-3 text-center">
       <div className="text-lg font-bold">{value}</div>
       <div className="text-xs text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function HealthBar({
+  label,
+  count,
+  total,
+  colorClass,
+}: {
+  label: string;
+  count: number;
+  total: number;
+  colorClass: string;
+}) {
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <div className="space-y-0.5">
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>{label}</span>
+        <span>{count} ({pct}%)</span>
+      </div>
+      <Progress value={pct} className={`h-1.5 ${colorClass}`} />
     </div>
   );
 }
