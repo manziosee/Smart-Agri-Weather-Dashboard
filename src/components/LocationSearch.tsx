@@ -81,7 +81,6 @@ export function LocationSearch({ onLocation }: Props) {
   async function search(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
-    // If we already have suggestions, just pick the first one
     if (suggestions.length > 0) {
       selectSuggestion(suggestions[0]);
       return;
@@ -92,7 +91,7 @@ export function LocationSearch({ onLocation }: Props) {
     try {
       const res = await fetch(`/api/geo?q=${encodeURIComponent(query)}&limit=1`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Location not found");
+      if (!data.lat || !data.lon) throw new Error("Location not found. Try a different city name.");
       onLocation({ lat: data.lat, lon: data.lon, name: data.name ?? query });
       setQuery("");
     } catch (err: unknown) {
