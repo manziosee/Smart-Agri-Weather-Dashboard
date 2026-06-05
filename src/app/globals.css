@@ -62,8 +62,23 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html {
+    scroll-behavior: smooth;
+    /* Safe area insets for notched phones */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
+  /* Prevent recharts SVG from overflowing on small screens */
+  .recharts-wrapper {
+    max-width: 100% !important;
+  }
+  .recharts-surface {
+    overflow: visible;
   }
 }

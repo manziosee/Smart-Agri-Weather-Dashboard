@@ -12,15 +12,15 @@ const CARDINALS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 
 export function WindCompass({ direction, speed }: Props) {
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Wind className="w-4 h-4 text-primary" />
           Wind
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center gap-3">
-        <div className="relative w-28 h-28">
+      <CardContent className="flex flex-col items-center justify-center gap-3 flex-1 py-4">
+        <div className="relative w-32 h-32 sm:w-36 sm:h-36">
           <svg viewBox="0 0 120 120" className="w-full h-full">
             <circle cx="60" cy="60" r="54" className="fill-muted stroke-border" strokeWidth="1.5" />
             <circle cx="60" cy="60" r="4" className="fill-primary" />
@@ -64,22 +64,20 @@ export function WindCompass({ direction, speed }: Props) {
             })}
 
             <g transform={`rotate(${direction}, 60, 60)`}>
-              <polygon
-                points="60,18 64,58 60,52 56,58"
-                className="fill-primary"
-              />
-              <polygon
-                points="60,102 64,62 60,68 56,62"
-                className="fill-muted-foreground"
-                opacity="0.5"
-              />
+              <polygon points="60,18 64,58 60,52 56,58" className="fill-primary" />
+              <polygon points="60,102 64,62 60,68 56,62" className="fill-muted-foreground" opacity="0.5" />
             </g>
           </svg>
         </div>
 
         <div className="text-center">
-          <p className="text-2xl font-bold">{Math.round(speed)} <span className="text-sm font-normal text-muted-foreground">m/s</span></p>
-          <p className="text-sm text-muted-foreground">{getWindDirection(direction)} ({direction}°)</p>
+          <p className="text-2xl font-bold">
+            {Math.round(speed)}{" "}
+            <span className="text-sm font-normal text-muted-foreground">m/s</span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {getWindDirection(direction)} ({direction}°)
+          </p>
         </div>
       </CardContent>
     </Card>
